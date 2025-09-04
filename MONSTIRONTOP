@@ -1,0 +1,133 @@
+-- Create ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "GrowAGardenSpawner"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Main Frame
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 400, 0, 300)
+MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainFrame.BorderSizePixel = 0
+MainFrame.Parent = ScreenGui
+
+-- Tabs
+local TabPet = Instance.new("TextButton")
+TabPet.Size = UDim2.new(0, 200, 0, 40)
+TabPet.Position = UDim2.new(0, 0, 0, 0)
+TabPet.Text = "Pet Spawner"
+TabPet.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+TabPet.TextColor3 = Color3.fromRGB(255, 255, 255)
+TabPet.Parent = MainFrame
+
+local TabSeed = Instance.new("TextButton")
+TabSeed.Size = UDim2.new(0, 200, 0, 40)
+TabSeed.Position = UDim2.new(0, 200, 0, 0)
+TabSeed.Text = "Seed Spawner"
+TabSeed.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+TabSeed.TextColor3 = Color3.fromRGB(255, 255, 255)
+TabSeed.Parent = MainFrame
+
+-- Content Frames
+local PetFrame = Instance.new("Frame")
+PetFrame.Size = UDim2.new(1, 0, 1, -40)
+PetFrame.Position = UDim2.new(0, 0, 0, 40)
+PetFrame.BackgroundTransparency = 1
+PetFrame.Parent = MainFrame
+
+local SeedFrame = Instance.new("Frame")
+SeedFrame.Size = UDim2.new(1, 0, 1, -40)
+SeedFrame.Position = UDim2.new(0, 0, 0, 40)
+SeedFrame.BackgroundTransparency = 1
+SeedFrame.Visible = false
+SeedFrame.Parent = MainFrame
+
+-- Tab Switching
+TabPet.MouseButton1Click:Connect(function()
+    PetFrame.Visible = true
+    SeedFrame.Visible = false
+end)
+TabSeed.MouseButton1Click:Connect(function()
+    PetFrame.Visible = false
+    SeedFrame.Visible = true
+end)
+
+-- Auto-detect RemoteEvent
+local function findRemote(keyword)
+    for _, obj in pairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+        if obj:IsA("RemoteEvent") and string.find(obj.Name:lower(), keyword:lower()) then
+            return obj
+        end
+    end
+    return nil
+end
+
+local petRemote = findRemote("pet")   -- automatically finds the pet RemoteEvent
+local seedRemote = findRemote("seed") -- automatically finds the seed RemoteEvent
+
+-- Pet Spawner UI
+local PetNameBox = Instance.new("TextBox")
+PetNameBox.Size = UDim2.new(0, 200, 0, 30)
+PetNameBox.Position = UDim2.new(0, 100, 0, 20)
+PetNameBox.PlaceholderText = "Enter Pet Name"
+PetNameBox.Parent = PetFrame
+
+local KGBox = Instance.new("TextBox")
+KGBox.Size = UDim2.new(0, 200, 0, 30)
+KGBox.Position = UDim2.new(0, 100, 0, 60)
+KGBox.PlaceholderText = "Enter KG"
+KGBox.Parent = PetFrame
+
+local MutationBox = Instance.new("TextBox")
+MutationBox.Size = UDim2.new(0, 200, 0, 30)
+MutationBox.Position = UDim2.new(0, 100, 0, 100)
+MutationBox.PlaceholderText = "Enter Mutation"
+MutationBox.Parent = PetFrame
+
+local SpawnPetButton = Instance.new("TextButton")
+SpawnPetButton.Size = UDim2.new(0, 150, 0, 40)
+SpawnPetButton.Position = UDim2.new(0, 125, 0, 150)
+SpawnPetButton.Text = "Spawn Pet"
+SpawnPetButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+SpawnPetButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpawnPetButton.Parent = PetFrame
+
+SpawnPetButton.MouseButton1Click:Connect(function()
+    local pet = PetNameBox.Text
+    local kg = tonumber(KGBox.Text)
+    local mutation = MutationBox.Text
+    if pet ~= "" and kg and mutation ~= "" then
+        if petRemote then
+            petRemote:FireServer(pet, kg, mutation)
+        else
+            warn("Pet RemoteEvent not found!")
+        end
+    end
+end)
+
+-- Seed Spawner UI
+local SeedNameBox = Instance.new("TextBox")
+SeedNameBox.Size = UDim2.new(0, 200, 0, 30)
+SeedNameBox.Position = UDim2.new(0, 100, 0, 20)
+SeedNameBox.PlaceholderText = "Enter Seed Name"
+SeedNameBox.Parent = SeedFrame
+
+local SpawnSeedButton = Instance.new("TextButton")
+SpawnSeedButton.Size = UDim2.new(0, 150, 0, 40)
+SpawnSeedButton.Position = UDim2.new(0, 125, 0, 60)
+SpawnSeedButton.Text = "Spawn Seed"
+SpawnSeedButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+SpawnSeedButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpawnSeedButton.Parent = SeedFrame
+
+SpawnSeedButton.MouseButton1Click:Connect(function()
+    local seed = SeedNameBox.Text
+    if seed ~= "" then
+        if seedRemote then
+            seedRemote:FireServer(seed)
+        else
+            warn("Seed RemoteEvent not found!")
+        end
+    end
+end)
